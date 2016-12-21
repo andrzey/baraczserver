@@ -11,12 +11,13 @@ var port = process.env.PORT || 8080;
 var router = express.Router();
 
 router.post('/', function (req, res) {
-    var userName = null;
-    request('https://graph.facebook.com/10157907626725445?access_token=EAAZAap0qcmaUBADUGgpJ5vZAr1sD0vq0Q9OVHOLdlt8VI21Y2AcAAyjNcFiiDzOaDxlr4E4YlMMK5FhCeuZAompbHnZB8jQOuAPA0y3CbAHutyJMQDOsLfot8fjGWsFlv6Pk8w1rZB1SujdA5lWitKBghP9JsMcZBbro7mjlJBGscCB56Q8d4rWFXBS3tnKGAZD', function (error, response, body) {
+    const token = req.body.token;
+    const userId = req.body.userId;
+    const graphApiUrl = `https://graph.facebook.com/${userId}?fields=id,name,first_name,last_name&access_token=${token}`
+
+    request(graphApiUrl, function (error, response, body) {
         body = JSON.parse(body);
-        userName = body.name;
-        console.log(userName);
-        res.json({ Bruker: userName });
+        res.json(body);
     })
 });
 
