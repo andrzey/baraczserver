@@ -2,9 +2,13 @@ var express = require('express');
 var app = express();
 var bodyParser = require('body-parser');
 var request = require('request');
+var mongoose = require('mongoose');
+var User = require('./model/User');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
+
+mongoose.connect('mongodb://localhost:27017/baracz');
 
 var port = process.env.PORT || 8080;
 
@@ -17,7 +21,18 @@ router.post('/', function (req, res) {
 
     request(graphApiUrl, function (error, response, body) {
         body = JSON.parse(body);
-        res.json(body);
+
+        const user = new User({
+            userid: body.id,
+            firstname: body.first_name,
+            lastname: body.last_name,
+        });
+
+        user.save((err, user) => {
+            if (err) return console.error(err);
+        });
+        res.status(200).send(body);
+        //res.json(body);
     })
 });
 
