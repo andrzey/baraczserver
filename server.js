@@ -4,6 +4,7 @@ var bodyParser = require('body-parser');
 var request = require('request');
 var mongoose = require('mongoose');
 var User = require('./model/User');
+var Post = require('./model/Post');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
@@ -32,9 +33,33 @@ router.post('/', function (req, res) {
             if (err) return console.error(err);
         });
         res.status(200).send(body);
-        //res.json(body);
     })
 });
+
+router.post('/addPost', function (req, res) {
+    const post = new Post({
+        title: req.body.title,
+        description: req.body.description,
+    });
+
+    post.save((err, post) => {
+        if (err) {
+            res.status(400).send('Error when saving post');
+        } else {
+            res.sendStatus(200);
+        }
+    });
+})
+
+router.get('/getList', function (req, res) {
+    Post.find(function (err, posts) {
+        if (err) {
+            res.status(404).send('Could not get any posts');
+        } else {
+            res.status(200).send(posts);
+        }
+    });
+})
 
 app.use('/api', router);
 
