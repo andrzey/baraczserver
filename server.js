@@ -1,67 +1,23 @@
 var express = require('express');
-var app = express();
 var bodyParser = require('body-parser');
 var request = require('request');
 var mongoose = require('mongoose');
-var User = require('./model/User');
-var Post = require('./model/Post');
+
+var apiRouter = require('./apiRouter');
+
+var app = express();
+var router = express.Router();
+mongoose.connect('mongodb://localhost:27017/baracz');
 
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
-mongoose.connect('mongodb://localhost:27017/baracz');
+app.use('/api', apiRouter(router));
 
-var port = process.env.PORT || 8080;
-
-var router = express.Router();
-
-router.post('/', function (req, res) {
-    const token = req.body.token;
-    const userId = req.body.userId;
-    const graphApiUrl = `https://graph.facebook.com/${userId}?fields=id,name,first_name,last_name&access_token=${token}`
-
-    request(graphApiUrl, function (error, response, body) {
-        body = JSON.parse(body);
-
-        const user = new User({
-            userid: body.id,
-            firstname: body.first_name,
-            lastname: body.last_name,
-        });
-
-        user.save((err, user) => {
-            if (err) return console.error(err);
-        });
-        res.status(200).send(body);
-    })
+app.use(function (err, req, res, next) {
+    res.status(500).send({ error: 'Something failed' })
 });
 
-router.post('/addPost', function (req, res) {
-    const post = new Post({
-        title: req.body.title,
-        description: req.body.description,
-    });
+app.listen(8080);
 
-    post.save((err, post) => {
-        if (err) {
-            res.status(400).send('Error when saving post');
-        } else {
-            res.sendStatus(200);
-        }
-    });
-})
-
-router.get('/getList', function (req, res) {
-    Post.find(function (err, posts) {
-        if (err) {
-            res.status(404).send('Could not get any posts');
-        } else {
-            res.status(200).send(posts);
-        }
-    });
-})
-
-app.use('/api', router);
-
-app.listen(port);
-console.log('Magic happens on port ' + port);
+console.log('Magic happens on port ' + 8080);
