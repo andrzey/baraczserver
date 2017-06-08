@@ -1,7 +1,6 @@
 let axios = require('axios');
 let User = require('../model/User');
 let jwt = require('jsonwebtoken');
-let Post = require('../model/Post');
 
 function authRouter(router) {
     

@@ -1,10 +1,10 @@
-var mongoose = require('mongoose');
+let mongoose = require('mongoose');
 
-var userSchema = mongoose.Schema({
+let userSchema = mongoose.Schema({
   facebookId: String,
   firstName: String
 });
 
-var User = mongoose.model('User', userSchema);
+let User = mongoose.model('User', userSchema);
 
 module.exports = User;
