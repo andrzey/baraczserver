@@ -1,10 +1,11 @@
-var axios = require('axios');
-var User = require('./model/User');
-var Post = require('./model/Post');
+let axios = require('axios');
+let User = require('../model/User');
+let jwt = require('jsonwebtoken');
+let Post = require('../model/Post');
 
-function apiRouter(router) {
-
-    router.get('/facebookauth', function (req, res) {
+function authRouter(router) {
+    
+    router.post('/facebookauth', function (req, res) {
         if (!req.body.token) return res.status(500).send('No facebook token provided');
 
         const token = req.body.token;
@@ -18,7 +19,7 @@ function apiRouter(router) {
                 const firstName = response.data.first_name;
 
                 User.findOne({ facebookId: facebookId }, (err, user) => {
-                    if (err) return next(err);
+                    if (err) return res.status(500).send('Something failed');
 
                     if (!user) {
                         const user = new User({
@@ -27,20 +28,36 @@ function apiRouter(router) {
                         });
 
                         user.save((err) => {
-                            if (err) { return next(err); }
-                            
-                            res.status(200).json({ token: 'Hurra!' });
+                            if (err) { return res.status(500).send('Failed to save user'); }
+
+                            res.status(200).json({ accessToken: createJwt(user) });
                         });
                     } else {
-                        res.status(200).json({ token: 'Fins' });
+                        res.status(200).json({ accessToken: createJwt(user) });
                     }
                 });
             })
             .catch(error => {
-                return next(error);
+                return res.status(500).send(error);
             })
     });
 
+    return router;
+}
+
+function createJwt(user) {
+    const token = jwt.sign(user, global.config.jwt_secret, {
+        expiresIn: 86400
+    });
+
+    return token
+}
+
+module.exports = authRouter;
+
+
+
+/*
     router.post('/addPost', function (req, res) {
         const post = new Post({
             title: req.body.title,
@@ -64,9 +81,4 @@ function apiRouter(router) {
                 res.status(200).send(posts);
             }
         });
-    })
-
-    return router;
-}
-
-module.exports = apiRouter;
+    })*/
