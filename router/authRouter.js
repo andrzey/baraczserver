@@ -3,7 +3,7 @@ let User = require('../model/User');
 let jwt = require('jsonwebtoken');
 
 function authRouter(router) {
-    
+
     router.post('/facebookauth', function (req, res) {
         if (!req.body.token) return res.status(500).send('No facebook token provided');
 
@@ -29,10 +29,10 @@ function authRouter(router) {
                         user.save((err) => {
                             if (err) { return res.status(500).send('Failed to save user'); }
 
-                            res.status(200).json({ accessToken: createJwt(user) });
+                            res.status(200).json({user: user, accessToken: createJwt(user) });
                         });
                     } else {
-                        res.status(200).json({ accessToken: createJwt(user) });
+                        res.status(200).json({ user: user, accessToken: createJwt(user) });
                     }
                 });
             })
