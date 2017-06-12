@@ -3,9 +3,28 @@ let uuidV4 = require('uuid/v4');
 
 function apiRouter(router) {
 
+    router.post('/addcomment', function (req, res) {
+        if (!req.body.happeningId) return res.status(400).send('Missing happeningId');
+        if (!req.body.comment) return res.status(400).send('Missing comment');
+
+        const happeningId = req.body.happeningId
+
+        Happening.findOne({ id: happeningId }, function (err, happening) {
+            if (err) return res.status(500).send('Error retrieveing happening');
+
+            happening.comments = [...happening.comments, { id: uuidV4(), comment: req.body.comment }];
+
+            happening.save((err, post) => {
+                if (err) return res.status(500).send('Error when saving comment');
+
+                res.status(200).json({ happening: happening });
+            })
+        });
+    });
+
     router.get('/loadhappenings', function (req, res) {
         Happening.find(function (err, happenings) {
-            if (err) return res.status(500).send('Something went wrong retrieving happenings');
+            if (err) return res.status(500).send('Error retrieving happenings');
 
             const happeningsArray = happenings.map(item => {
                 const happening = {
@@ -42,7 +61,7 @@ function apiRouter(router) {
         });
 
         happening.save((err, post) => {
-            if (err) return res.status(500).send('Something went wrong when creating happening');
+            if (err) return res.status(500).send('Error creating happening');
 
             res.status(200).json({ happening: happening });
         });
