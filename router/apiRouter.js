@@ -45,19 +45,18 @@ function apiRouter(router) {
     });
 
     router.post('/addhappening', function (req, res) {
-        if (!req.body.happening) return res.status(400).send('Missing Happening');
-        if (!req.body.happening.title) return res.status(400).send('Missing title');
-        if (!req.body.happening.place) return res.status(400).send('Missing place');
-        if (!req.body.happening.time) return res.status(400).send('Missing time');
-        if (!req.body.happening.description) return res.status(400).send('Missing description');
+        if (!req.body.title) return res.status(400).send('Missing title');
+        if (!req.body.place) return res.status(400).send('Missing place');
+        if (!req.body.time) return res.status(400).send('Missing time');
+        if (!req.body.description) return res.status(400).send('Missing description');
 
         const happening = new Happening({
             id: uuidV4(),
             owner: 'Andrzej Thingstad',
-            title: req.body.happening.title,
-            place: req.body.happening.place,
-            time: req.body.happening.time,
-            description: req.body.happening.description,
+            title: req.body.title,
+            place: req.body.place,
+            time: req.body.time,
+            description: req.body.description,
             comments: [],
             participants: []
         });
@@ -67,7 +66,27 @@ function apiRouter(router) {
 
             res.status(200).json({ happening: happening });
         });
-    })
+    });
+
+    router.post('/joinHappening', function (req, res) {
+        if (!req.body.name) return res.status(400).send('Missing name');
+        if (!req.body.happeningId) return res.status(400).send('Missing happeningId');
+
+        const happeningId = req.body.happeningId;
+        const name = req.body.name;
+
+        Happening.findOne({ id: happeningId }, function (err, happening) {
+            if (err) return res.status(500).send('Error retrieveing happening');
+
+            happening.participants = [{ id: 1, name: name }, ...happening.participants];
+
+            happening.save((err, post) => {
+                if (err) return res.status(500).send('Error when saving participant');
+
+                res.status(200).json({ happening: happening });
+            })
+        });
+    });
 
     return router
 }
