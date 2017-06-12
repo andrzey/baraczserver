@@ -7,7 +7,21 @@ function apiRouter(router) {
         Happening.find(function (err, happenings) {
             if (err) return res.status(500).send('Something went wrong retrieving happenings');
 
-            res.status(200).json({ happenings: happenings });
+            const happeningsArray = happenings.map(item => {
+                const happening = {
+                    id: item.id,
+                    title: item.title,
+                    place: item.place,
+                    time: item.time,
+                    description: item.description,
+                    participants: item.participants,
+                    comments: item.comments
+                }
+
+                return happening;
+            })
+
+            res.status(200).json({ happenings: happeningsArray });
         });
     });
 
