@@ -1,5 +1,6 @@
 let Happening = require('../model/Happening');
 let uuidV4 = require('uuid/v4');
+let _ = require('lodash');
 
 function apiRouter(router) {
 
@@ -81,7 +82,30 @@ function apiRouter(router) {
             happening.participants = [{ id: 1, name: name }, ...happening.participants];
 
             happening.save((err, post) => {
-                if (err) return res.status(500).send('Error when saving participant');
+                if (err) return res.status(500).send('Error when saving participants');
+
+                res.status(200).json({ happening: happening });
+            })
+        });
+    });
+
+    router.post('/leaveHappening', function (req, res) {
+        if (!req.body.name) return res.status(400).send('Missing name');
+        if (!req.body.happeningId) return res.status(400).send('Missing happeningId');
+
+        const happeningId = req.body.happeningId;
+        const name = req.body.name;
+
+        Happening.findOne({ id: happeningId }, function (err, happening) {
+            if (err) return res.status(500).send('Error retrieveing happening');
+
+
+            happening.participants = _.filter(happening.participants, (user) => {
+                return user.name !== name;
+            });
+
+            happening.save((err, post) => {
+                if (err) return res.status(500).send('Error when saving participants');
 
                 res.status(200).json({ happening: happening });
             })
