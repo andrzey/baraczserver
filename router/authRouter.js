@@ -21,18 +21,26 @@ function authRouter(router) {
                     if (err) return res.status(500).send('Something failed');
 
                     if (!user) {
-                        const user = new User({
+                        const newUser = new User({
                             facebookId: facebookId,
-                            firstName: firstName
+                            firstName: firstName,
+                            interests: []
                         });
 
                         user.save((err) => {
                             if (err) { return res.status(500).send('Failed to save user'); }
 
-                            res.status(200).json({user: user, accessToken: createJwt(user) });
+                            res.status(200).json({ user: newUser, accessToken: createJwt(newUser) });
                         });
                     } else {
-                        res.status(200).json({ user: user, accessToken: createJwt(user) });
+
+                        const foundUser = {
+                            facebookId: user.facebookId,
+                            firstName: user.firstName,
+                            interests: user.interests
+                        };
+
+                        res.status(200).json({ user: foundUser, accessToken: createJwt(foundUser) });
                     }
                 });
             })
@@ -53,31 +61,3 @@ function createJwt(user) {
 }
 
 module.exports = authRouter;
-
-
-
-/*
-    router.post('/addPost', function (req, res) {
-        const post = new Post({
-            title: req.body.title,
-            description: req.body.description,
-        });
-
-        post.save((err, post) => {
-            if (err) {
-                res.status(400).send('Error when saving post');
-            } else {
-                res.sendStatus(200);
-            }
-        });
-    })
-
-    router.get('/getList', function (req, res) {
-        Post.find(function (err, posts) {
-            if (err) {
-                res.status(404).send('Could not get any posts');
-            } else {
-                res.status(200).send(posts);
-            }
-        });
-    })*/
