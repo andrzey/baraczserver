@@ -7,6 +7,7 @@ global.config = require('./config');
 
 let authRouter = require('./router/authRouter');
 let apiRouter = require('./router/apiRouter');
+let userRouter = require('./router/userRouter');
 let verifyToken = require('./middleware/verifyToken');
 
 let app = express();
@@ -19,6 +20,7 @@ app.use(morgan('dev'));
 
 app.use('/auth', authRouter(router));
 app.use('/api', verifyToken, apiRouter(router));
+app.use('/user', verifyToken, userRouter(router));
 
 app.use(function (err, req, res, next) {
     res.status(500).send({ error: err })
