@@ -1,5 +1,5 @@
 let User = require('../model/User');
-let jwt = require('jsonwebtoken');
+let utils = require('../utils/utils');
 
 function userRouter(router) {
 
@@ -8,14 +8,14 @@ function userRouter(router) {
 
         const token = req.headers['authorization'];
         const interests = req.body.interests;
-        const facebookId = getUserId(token);
+        const facebookId = utils.getUserId(token);
 
         User.findOne({ facebookId: facebookId }, function (err, user) {
             if (err) throw err;
             if (user === null) return res.status(404).send(`No user with userid: ${userId} found`);
 
             user.interests = interests;
-            
+
             user.save((err, post) => {
                 if (err) return res.status(500).send('Error when saving user');
 
@@ -26,13 +26,6 @@ function userRouter(router) {
     });
 
     return router;
-}
-
-
-function getUserId(token) {
-    var decoded = jwt.decode(token);
-
-    return decoded.facebookId;
 }
 
 module.exports = userRouter;

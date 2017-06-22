@@ -1,6 +1,7 @@
 let Happening = require('../model/Happening');
 let uuidV4 = require('uuid/v4');
 let _ = require('lodash');
+let utils = require('../utils/utils');
 
 function apiRouter(router) {
 
@@ -23,6 +24,32 @@ function apiRouter(router) {
         });
     });
 
+    router.get('/loadmyhappenings', function (req, res) {
+        const token = req.headers['authorization'];
+        const userId = utils.getUserId(token);
+
+        Happening.find({ creator: userId }, function (err, happenings) {
+            if (err) return res.status(500).send('Error retrieving happenings');
+
+            const myHappeningsArray = happenings.map(item => {
+                const happening = {
+                    id: item.id,
+                    title: item.title,
+                    place: item.place,
+                    time: item.time,
+                    description: item.description,
+                    participants: item.participants,
+                    comments: item.comments,
+                    creator: item.creator
+                }
+
+                return happening;
+            });
+
+            res.status(200).json({ happenings: myHappeningsArray });
+        });
+    });
+
     router.get('/loadhappenings', function (req, res) {
         Happening.find(function (err, happenings) {
             if (err) return res.status(500).send('Error retrieving happenings');
@@ -35,7 +62,8 @@ function apiRouter(router) {
                     time: item.time,
                     description: item.description,
                     participants: item.participants,
-                    comments: item.comments
+                    comments: item.comments,
+                    creator: item.creator
                 }
 
                 return happening;
@@ -50,10 +78,11 @@ function apiRouter(router) {
         if (!req.body.place) return res.status(400).send('Missing place');
         if (!req.body.time) return res.status(400).send('Missing time');
         if (!req.body.description) return res.status(400).send('Missing description');
+        if (!req.body.creator) return res.status(400).send('Missing creator');
 
         const happening = new Happening({
             id: uuidV4(),
-            owner: 'Andrzej Thingstad',
+            creator: req.body.creator,
             title: req.body.title,
             place: req.body.place,
             time: req.body.time,

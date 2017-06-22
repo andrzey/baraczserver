@@ -2,7 +2,7 @@ let mongoose = require('mongoose');
 
 let happeningSchema = mongoose.Schema({
   id: String,
-  owner: String,
+  creator: String,
   title: String,
   place: String,
   time: String,
