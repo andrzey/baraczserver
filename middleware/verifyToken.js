@@ -5,7 +5,7 @@ function verifyToken(req, res, next) {
 
     if (token) {
         jwt.verify(token, global.config.jwt_secret, function (err, decoded) {
-            if (err) return res.status(500).send('Something went wrong verifying the accesstoken');
+            if (err) return res.status(401).send('Cant verify token');
 
             next();
         });
